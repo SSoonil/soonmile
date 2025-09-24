@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sist.web.dao.PlaceDao">
+
+	<!-- place resultMap -->
+	<resultMap type="com.sist.web.model.Place" id="placeResultMap">
+		<id column="PLACE_ID" property="placeId" />
+		<result column="GROUP_ID" property="groupId" />
+		<result column="USER_ID" property="userId" />
+		<result column="PLACE_NAME" property="placeName" />
+		<result column="PLACE_X" property="placeX" />
+		<result column="PLACE_Y" property="placeY" />
+		<result column="PLACE_ADDR" property="placeAddr" />
+		<result column="PLACE_REVIEW" property="placeReview" />
+		<result column="PLACE_RATE" property="placeRate" />
+		<result column="CREATE_AT" property="createAt" />
+		<result column="STATUS" property="status" />
+		<result column="PLACE_VISIT_DATE" property="placeVisitDate" />
+		<result column="PLACE_CATEGORY_GROUP_NAME" property="placeCategoryGroupName" />
+		<result column="PLACE_PHONE" property="placePhone" />
+		<result column="PLACE_URL" property="placeUrl" />
+		<result column="PLACE_ROAD_ADDR" property="placeRoadAddr" />
+	</resultMap>
+	
+	
+	
+	<insert id="regPlace" parameterType="com.sist.web.model.Place">
+		INSERT INTO SM_PLACE(
+			   PLACE_ID, 
+			   GROUP_ID, 
+			   USER_ID, 
+			   PLACE_NAME, 
+			   PLACE_X, 
+			   PLACE_Y, 
+			   PLACE_ADDR, 
+			   PLACE_REVIEW, 
+			   PLACE_RATE, 
+			   CREATE_AT, 
+			   STATUS, 
+			   PLACE_VISIT_DATE, 
+			   PLACE_CATEGORY_GROUP_NAME,
+			   PLACE_PHONE,
+			   PLACE_URL,
+			   PLACE_ROAD_ADDR
+		)
+		VALUES(
+			   SEQ_PLACE_ID.NEXTVAL,
+			   #{groupId},
+			   #{userId},
+			   #{placeName},
+			   #{placeX},
+			   #{placeY},
+			   #{placeAddr},
+			   #{placeReview},
+			   #{placeRate},
+			   SYSDATE,
+			   1,
+			   #{placeVisitDate},
+			   #{placeCategoryGroupName},
+			   #{placePhone},
+			   #{placeUrl},
+			   #{placeRoadAddr}
+		)
+	</insert>
+	
+	<select id="placeList" parameterType="com.sist.web.model.Place" resultMap="placeResultMap">
+		SELECT P.PLACE_ID, 
+			   P.GROUP_ID, 
+			   P.USER_ID, 
+			   P.PLACE_NAME, 
+			   P.PLACE_X, 
+			   P.PLACE_Y, 
+			   P.PLACE_ADDR, 
+			   P.PLACE_REVIEW, 
+			   P.PLACE_RATE, 
+			   P.CREATE_AT, 
+			   P.STATUS, 
+			   P.PLACE_VISIT_DATE, 
+			   P.PLACE_CATEGORY_GROUP_NAME, 
+			   P.PLACE_PHONE,
+			   P.PLACE_URL,
+			   P.PLACE_ROAD_ADDR
+		  FROM SM_PLACE P
+		  <choose>
+		  	<when test = "groupId eq 'all'">
+		  	WHERE GROUP_ID IN (SELECT GROUP_ID FROM SM_GROUP_USER WHERE USER_ID = #{userId})
+		  	</when>
+		 	<otherwise>
+		 	WHERE GROUP_ID = #{groupId}
+		 	</otherwise> 
+		  </choose>
+	</select>
+
+	
+</mapper>

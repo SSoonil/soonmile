@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sist.web.dao.GroupDao">
+
+	<!-- 그룹 resultMap -->
+	<resultMap type="com.sist.web.model.Group" id="groupResultMap">
+		<id column="GROUP_ID" property="groupId"/>
+		<result column="OWNER_ID" property="ownerId" />
+		<result column="GROUP_NAME" property="groupName" />
+		<result column="IS_PUBLIC" property="isPublic" />
+		<result column="GROUP_INTRO" property="groupIntro" />
+		<result column="GROUP_PROFILE" property="groupProfile" />
+		<result column="INVITE_CODE" property="inviteCode" />
+		<result column="STATUS" property="status" />
+		<result column="CREATE_AT" property="createAt" />
+		<result column="UPDATE_AT" property="updateAt" />
+	</resultMap>
+	
+	<insert id="groupMade" parameterType="com.sist.web.model.Group">
+		INSERT INTO SM_GROUP(
+			   GROUP_ID,
+			   OWNER_ID,
+			   GROUP_NAME,
+			   IS_PUBLIC,
+			   GROUP_INTRO,
+			   GROUP_PROFILE,
+			   INVITE_CODE,
+			   STATUS,
+			   CREATE_AT,
+			   UPDATE_AT
+		) VALUES(
+			   GROUP_ID_SEQ.NEXTVAL,
+			   #{ownerId},
+			   #{groupName},
+			   #{isPublic},
+			   #{groupIntro},
+			   #{groupProfile},
+			   #{inviteCode},
+			   'Y',
+			   SYSDATE,
+			   SYSDATE
+		)
+	</insert>
+	
+	<select id="groupList" parameterType="com.sist.web.model.Group" resultMap="groupResultMap">
+		SELECT GROUP_ID, 
+       		   OWNER_ID, 
+       		   GROUP_NAME, 
+       		   IS_PUBLIC, 
+       		   GROUP_PROFILE, 
+       		   INVITE_CODE, 
+       		   STATUS, 
+       		   CREATE_AT, 
+       		   UPDATE_AT, 
+       		   USER_ID
+		  FROM
+		       (SELECT ROWNUM AS R, 
+		       		   GROUP_ID, 
+		       		   OWNER_ID, 
+		       		   GROUP_NAME, 
+		       		   IS_PUBLIC, 
+		       		   GROUP_PROFILE, 
+		       		   INVITE_CODE, 
+		       		   STATUS, 
+		       		   CREATE_AT, 
+		       		   UPDATE_AT, 
+		       		   USER_ID
+		          FROM (SELECT G.GROUP_ID,
+		          			   G.OWNER_ID,
+		          			   NVL(G.GROUP_NAME, '') GROUP_NAME, 
+		          			   NVL(G.IS_PUBLIC, '') IS_PUBLIC, 
+		          			   NVL(G.GROUP_INTRO, '') GROUP_INTRO, 
+		          			   NVL(G.GROUP_PROFILE, '') GROUP_PROFILE, 
+		          			   NVL(G.INVITE_CODE, '') INVITE_CODE, 
+		          			   NVL(G.STATUS, '') STATUS, 
+		          			   NVL(TO_CHAR(G.CREATE_AT, 'YYYY.MM.DD'), '') CREATE_AT, 
+		          			   NVL(TO_CHAR(G.UPDATE_AT, 'YYYY.MM.DD'), '') UPDATE_AT, 
+		          			   NVL(GU.USER_ID, '') USER_ID
+		                  FROM SM_GROUP G,
+		                       SM_GROUP_USER GU
+		                 WHERE G.GROUP_ID = GU.GROUP_ID
+		                   AND USER_ID = #{userId}
+		                 ORDER BY G.GROUP_ID DESC) T)
+		 WHERE R BETWEEN #{startNum} AND #{endNum}
+	</select>
+	<select id="groupListCount" parameterType="com.sist.web.model.Group" resultType="long">
+		SELECT COUNT(*)
+		  FROM SM_GROUP G,
+		       SM_GROUP_USER GU
+		 WHERE G.GROUP_ID = GU.GROUP_ID
+		   AND GU.USER_ID = #{userId}
+	</select>
+</mapper>
